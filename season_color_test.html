@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>四季色彩测试</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-light: #E8F5E9;
+            --text-primary: #2C3E50;
+            --text-secondary: #666;
+            --border-radius: 15px;
+            --shadow-soft: 0 2px 10px rgba(0,0,0,0.08);
+            --shadow-strong: 0 4px 20px rgba(0,0,0,0.12);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'PingFang SC', Arial, sans-serif;
+            min-height: 100vh;
+            background: #f8f9fa;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        .page-container {
+            display: flex;
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            align-items: flex-start;
+        }
+        .left-section, .right-section {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .left-section {
+            flex: 1;
+            max-width: 600px;
+            align-items: center;
+        }
+        .right-section {
+            flex: 1;
+        }
+        /* 统一所有主要板块样式 */
+        .camera-section, .season-palettes, .guide-section, .advice-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow-soft);
+        }
+        /* 统一所有子板块样式 */
+        .season-palette, .guide-step, .characteristics, .fashion-tips {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .season-palette:last-child,
+        .guide-step:last-child,
+        .characteristics:last-child,
+        .fashion-tips:last-child {
+            margin-bottom: 0;
+        }
+        /* 统一标题样式 */
+        .guide-section h2,
+        .season-advice h2 {
+            font-size: 26px;
+            margin: 0 0 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-light);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .season-advice h2 {
+            text-align: center;
+        }
+        /* 统一三级标题样式 */
+        .characteristics h3,
+        .fashion-tips h3 {
+            font-size: 20px;
+            margin: 0 0 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        /* 统一列表样式 */
+        .characteristics ul,
+        .fashion-tips ul {
+            margin: 0;
+            padding-left: 25px;
+            list-style-type: none;
+        }
+        .characteristics li,
+        .fashion-tips li {
+            position: relative;
+            padding: 8px 0;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        .camera-container {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid white;
+            box-shadow: var(--shadow-strong);
+            z-index: 2;
+            transition: var(--transition-smooth);
+        }
+        .camera-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+            pointer-events: none;
+        }
+        #faceVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+        .color-ring {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: transparent;
+            z-index: 1;
+            transition: var(--transition-smooth);
+        }
+        .season-palette {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #fafafa;
+            transition: var(--transition-smooth);
+        }
+        .season-palette:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+        .season-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .season-title::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 18px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 10px;
+            justify-items: center;
+        }
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: var(--transition-smooth);
+            position: relative;
+        }
+        .color-option:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .color-option.selected {
+            border-color: var(--primary-color);
+            transform: scale(1.15);
+        }
+        .color-option.selected::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+        .guide-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow-soft);
+        }
+        .guide-section h2 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary-light);
+            font-size: 22px;
+        }
+        .guide-steps {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .guide-step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 12px;
+            transition: var(--transition-smooth);
+        }
+        .guide-step:hover {
+            background: var(--primary-light);
+            transform: translateX(5px);
+        }
+        .step-number {
+            background: var(--primary-color);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(76,175,80,0.3);
+        }
+        .step-content {
+            flex: 1;
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+        .advice-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow-soft);
+        }
+        .season-advice {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .season-advice.active {
+            display: block;
+        }
+        .season-advice h2 {
+            color: var(--text-primary);
+            font-size: 26px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-light);
+            text-align: center;
+            font-weight: 600;
+        }
+        .characteristics {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #fafafa;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .characteristics h3 {
+            color: var(--text-primary);
+            font-size: 20px;
+            margin: 0 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .characteristics h3::before {
+            content: '👤';
+            font-size: 22px;
+        }
+        .characteristics ul {
+            margin: 0;
+            padding-left: 25px;
+            list-style-type: none;
+        }
+        .characteristics li {
+            position: relative;
+            padding: 8px 0;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        .characteristics li::before {
+            content: '•';
+            color: var(--primary-color);
+            position: absolute;
+            left: -20px;
+            font-size: 20px;
+            line-height: 1;
+        }
+        .fashion-tips {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .fashion-tips h3 {
+            color: var(--text-primary);
+            font-size: 20px;
+            margin: 0 0 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .fashion-tips h3::before {
+            content: '👗';
+            font-size: 22px;
+        }
+        .fashion-tips h4 {
+            color: var(--text-primary);
+            font-size: 18px;
+            margin: 20px 0 15px;
+            padding-left: 15px;
+            border-left: 3px solid var(--primary-color);
+        }
+        .fashion-tips ul {
+            padding-left: 25px;
+            margin: 15px 0;
+            list-style-type: none;
+        }
+        .fashion-tips li {
+            position: relative;
+            padding: 6px 0;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        .fashion-tips li::before {
+            content: '✓';
+            color: var(--primary-color);
+            position: absolute;
+            left: -20px;
+            font-weight: bold;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @media (max-width: 1200px) {
+            .page-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .right-section {
+                width: 100%;
+                max-width: 600px;
+            }
+        }
+        .camera-section {
+            position: relative;
+            width: 500px;
+            height: 500px;
+        }
+        .season-palettes {
+            width: 500px;
+        }
+        .season-palette {
+            transition: var(--transition-smooth);
+        }
+        .season-palette:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+        .guide-step {
+            display: flex;
+            align-items: flex-start;
+            transition: var(--transition-smooth);
+        }
+        .guide-step:hover {
+            background: var(--primary-light);
+            transform: translateX(5px);
+        }
+        .characteristics {
+            border-left: 4px solid var(--primary-color);
+        }
+        .fashion-tips h4 {
+            color: var(--text-primary);
+            font-size: 18px;
+            margin: 20px 0 15px;
+            padding-left: 15px;
+            border-left: 3px solid var(--primary-color);
+        }
+        /* 统一图标和装饰元素 */
+        .characteristics h3::before,
+        .fashion-tips h3::before {
+            font-size: 22px;
+        }
+        .characteristics h3::before {
+            content: '👤';
+        }
+        .fashion-tips h3::before {
+            content: '👗';
+        }
+        .characteristics li::before,
+        .fashion-tips li::before {
+            position: absolute;
+            left: -20px;
+            color: var(--primary-color);
+        }
+        .characteristics li::before {
+            content: '•';
+            font-size: 20px;
+            line-height: 1;
+        }
+        .fashion-tips li::before {
+            content: '✓';
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="left-section">
+            <div class="camera-section">
+                <div class="camera-container">
+                    <video id="faceVideo" autoplay playsinline></video>
+                </div>
+                <div class="color-ring" id="colorRing"></div>
+            </div>
+            
+            <div class="season-palettes">
+                <div class="season-palette">
+                    <div class="season-title">春季色板</div>
+                    <div class="color-grid" data-season="spring">
+                        <div class="color-option" style="background-color: #FFB6C1" data-color="#FFB6C1" data-season="spring"></div>
+                        <div class="color-option" style="background-color: #FFD700" data-color="#FFD700" data-season="spring"></div>
+                        <div class="color-option" style="background-color: #98FB98" data-color="#98FB98" data-season="spring"></div>
+                        <div class="color-option" style="background-color: #87CEEB" data-color="#87CEEB" data-season="spring"></div>
+                    </div>
+                </div>
+                
+                <div class="season-palette">
+                    <div class="season-title">夏季色板</div>
+                    <div class="color-grid" data-season="summer">
+                        <div class="color-option" style="background-color: #E6E6FA" data-color="#E6E6FA" data-season="summer"></div>
+                        <div class="color-option" style="background-color: #B0E0E6" data-color="#B0E0E6" data-season="summer"></div>
+                        <div class="color-option" style="background-color: #F0F8FF" data-color="#F0F8FF" data-season="summer"></div>
+                        <div class="color-option" style="background-color: #E6E6FA" data-color="#E6E6FA" data-season="summer"></div>
+                    </div>
+                </div>
+                
+                <div class="season-palette">
+                    <div class="season-title">秋季色板</div>
+                    <div class="color-grid" data-season="autumn">
+                        <div class="color-option" style="background-color: #D2691E" data-color="#D2691E" data-season="autumn"></div>
+                        <div class="color-option" style="background-color: #DAA520" data-color="#DAA520" data-season="autumn"></div>
+                        <div class="color-option" style="background-color: #8B4513" data-color="#8B4513" data-season="autumn"></div>
+                        <div class="color-option" style="background-color: #CD853F" data-color="#CD853F" data-season="autumn"></div>
+                    </div>
+                </div>
+                
+                <div class="season-palette">
+                    <div class="season-title">冬季色板</div>
+                    <div class="color-grid" data-season="winter">
+                        <div class="color-option" style="background-color: #4682B4" data-color="#4682B4" data-season="winter"></div>
+                        <div class="color-option" style="background-color: #483D8B" data-color="#483D8B" data-season="winter"></div>
+                        <div class="color-option" style="background-color: #191970" data-color="#191970" data-season="winter"></div>
+                        <div class="color-option" style="background-color: #000080" data-color="#000080" data-season="winter"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-section">
+            <div class="guide-section">
+                <h2>使用指引</h2>
+                <ul class="guide-steps">
+                    <li class="guide-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            调整好摄像头位置，确保面部在圆形区域内居中显示
+                        </div>
+                    </li>
+                    <li class="guide-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            点击下方色板中的不同颜色，观察颜色环绕效果
+                        </div>
+                    </li>
+                    <li class="guide-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            注意观察：肤色是否显得健康、气色是否提升、整体效果是否和谐
+                        </div>
+                    </li>
+                    <li class="guide-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            选择最适合的色系，查看下方的专业搭配建议
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="advice-section">
+                <div id="springAdvice" class="season-advice">
+                    <h2>春季色彩类型</h2>
+                    <div class="characteristics">
+                        <h3>个人特征</h3>
+                        <ul>
+                            <li>肤色：温暖、象牙色或金色调</li>
+                            <li>发色：金棕色或温暖的褐色</li>
+                            <li>眼睛：明亮、温暖的色调</li>
+                        </ul>
+                    </div>
+                    <div class="fashion-tips">
+                        <h3>穿搭建议</h3>
+                        <h4>最佳色彩</h4>
+                        <ul>
+                            <li>明亮的珊瑚粉</li>
+                            <li>温暖的黄色</li>
+                            <li>嫩绿色</li>
+                            <li>温暖的蓝色</li>
+                        </ul>
+                        <h4>搭配技巧</h4>
+                        <ul>
+                            <li>选择鲜艳、温暖的色调</li>
+                            <li>避免深沉、暗淡的颜色</li>
+                            <li>搭配金色配饰</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="summerAdvice" class="season-advice">
+                    <h2>夏季色彩类型</h2>
+                    <div class="characteristics">
+                        <h3>个人特征</h3>
+                        <ul>
+                            <li>肤色：粉红调或浅蓝调</li>
+                            <li>发色：浅褐色或灰褐色</li>
+                            <li>眼睛：浅色或灰蓝色</li>
+                        </ul>
+                    </div>
+                    <div class="fashion-tips">
+                        <h3>穿搭建议</h3>
+                        <h4>最佳色彩</h4>
+                        <ul>
+                            <li>柔和的紫罗兰</li>
+                            <li>淡蓝色</li>
+                            <li>粉红色</li>
+                            <li>薄荷绿</li>
+                        </ul>
+                        <h4>搭配技巧</h4>
+                        <ul>
+                            <li>选择柔和、清爽的色调</li>
+                            <li>避免过于明艳的色彩</li>
+                            <li>搭配银色配饰</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="autumnAdvice" class="season-advice">
+                    <h2>秋季色彩类型</h2>
+                    <div class="characteristics">
+                        <h3>个人特征</h3>
+                        <ul>
+                            <li>肤色：温暖的象牙色或金褐色</li>
+                            <li>发色：红褐色或深金色</li>
+                            <li>眼睛：琥珀色或深褐色</li>
+                        </ul>
+                    </div>
+                    <div class="fashion-tips">
+                        <h3>穿搭建议</h3>
+                        <h4>最佳色彩</h4>
+                        <ul>
+                            <li>焦糖色</li>
+                            <li>橄榄绿</li>
+                            <li>赭石色</li>
+                            <li>深金色</li>
+                        </ul>
+                        <h4>搭配技巧</h4>
+                        <ul>
+                            <li>选择温暖、深沉的色调</li>
+                            <li>避免冷调、浅淡的颜色</li>
+                            <li>搭配古铜色配饰</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="winterAdvice" class="season-advice">
+                    <h2>冬季色彩类型</h2>
+                    <div class="characteristics">
+                        <h3>个人特征</h3>
+                        <ul>
+                            <li>肤色：冷调、象牙白或橄榄色</li>
+                            <li>发色：深褐色或黑色</li>
+                            <li>眼睛：深色或冷调色彩</li>
+                        </ul>
+                    </div>
+                    <div class="fashion-tips">
+                        <h3>穿搭建议</h3>
+                        <h4>最佳色彩</h4>
+                        <ul>
+                            <li>纯白色</li>
+                            <li>宝蓝色</li>
+                            <li>深紫色</li>
+                            <li>正红色</li>
+                        </ul>
+                        <h4>搭配技巧</h4>
+                        <ul>
+                            <li>选择鲜明、冷调的色彩</li>
+                            <li>避免黄褐色等暖色调</li>
+                            <li>搭配银色或白金色配饰</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化摄像头
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: "user"
+                    }
+                });
+                const video = document.getElementById('faceVideo');
+                video.srcObject = stream;
+            } catch (err) {
+                console.error("摄像头访问失败:", err);
+                alert("请允许访问摄像头以进行色彩测试");
+            }
+        }
+
+        // 创建径向渐变背景
+        function createRadialGradient(color) {
+            const colorRing = document.getElementById('colorRing');
+            colorRing.style.background = `radial-gradient(circle, transparent 140px, ${color} 150px)`;
+        }
+
+        // 显示季节建议
+        function showSeasonAdvice(season) {
+            // 隐藏所有建议
+            document.querySelectorAll('.season-advice').forEach(advice => {
+                advice.classList.remove('active');
+            });
+            
+            // 显示对应季节的建议
+            const adviceElement = document.getElementById(`${season}Advice`);
+            if (adviceElement) {
+                adviceElement.classList.add('active');
+            }
+        }
+
+        // 颜色选择事件
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除所有选中状态
+                document.querySelectorAll('.color-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // 添加当前选中状态
+                this.classList.add('selected');
+                
+                // 更新环形颜色
+                createRadialGradient(this.dataset.color);
+                
+                // 显示对应季节的建议
+                showSeasonAdvice(this.dataset.season);
+            });
+        });
+
+        // 初始化
+        window.addEventListener('load', () => {
+            initCamera();
+            // 默认显示春季建议
+            showSeasonAdvice('spring');
+        });
+    </script>
+</body>
+</html>
